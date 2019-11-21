@@ -1,0 +1,3 @@
+-----BEGIN CERTIFICATE-----
+Place here the AWS IOT certificate
+-----END CERTIFICATE-----

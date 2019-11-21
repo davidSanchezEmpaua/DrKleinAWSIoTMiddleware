@@ -1,0 +1,3 @@
+-----BEGIN RSA PRIVATE KEY-----
+Place Here the AWS IOT Private Key
+-----END RSA PRIVATE KEY-----
