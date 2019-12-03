@@ -19,7 +19,7 @@
  ****************************************************************************/
 // http://oauth.googlecode.com/svn/code/branches/jmeter/jmeter/src/main/java/org/apache/jmeter/protocol/oauth/sampler/PrivateKeyReader.java
 
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

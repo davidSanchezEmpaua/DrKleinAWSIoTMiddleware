@@ -11,7 +11,7 @@
  *   #    Who               When            What
  *   ----------------------------------------------------------------------------------------------------------------------------    
  */
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

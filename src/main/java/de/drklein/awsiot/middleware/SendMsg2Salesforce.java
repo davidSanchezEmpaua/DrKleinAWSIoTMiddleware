@@ -14,7 +14,7 @@
  *   #    Who               When            What
  *   ----------------------------------------------------------------------------------------------------------------------------    
  */
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +40,8 @@ public class SendMsg2Salesforce implements Runnable {
                     queue     -- Queue from where the messages to be sent are retrived.
      */
     public SendMsg2Salesforce(SalesforceConnect sforceCnt, BlockingQueue<String> queue) {
-        this.sforceCnt = sforceCnt;
         this.queue = queue;
+        this.sforceCnt = sforceCnt;
 
         String buffSizeProperty = AWSutilities.getConfig("BUFFERING_SIZE");
         String buffTimeLmtProperty = AWSutilities.getConfig("BUFFERING_TIMELIMIT");
