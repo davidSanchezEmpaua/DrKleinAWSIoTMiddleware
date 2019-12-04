@@ -23,7 +23,7 @@
  *   ----------------------------------------------------------------------------------------------------------------------------    
  */
 
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.BlockingQueue;

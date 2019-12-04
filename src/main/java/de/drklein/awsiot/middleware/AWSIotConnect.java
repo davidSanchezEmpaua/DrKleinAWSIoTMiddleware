@@ -11,7 +11,7 @@
  *   #    Who               When            What
  *   ----------------------------------------------------------------------------------------------------------------------------    
  */
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.BlockingQueue;
@@ -20,7 +20,7 @@ import com.amazonaws.services.iot.client.AWSIotException;
 import com.amazonaws.services.iot.client.AWSIotMqttClient;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTopic;
-import DrKleinAWSIoTMiddleware.AWSutilities.KeyStorePasswordPair;
+import de.drklein.awsiot.middleware.AWSutilities.KeyStorePasswordPair;
 
 public class AWSIotConnect {
     

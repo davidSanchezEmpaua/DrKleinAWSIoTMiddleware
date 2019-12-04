@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package DrKleinAWSIoTMiddleware;
+package de.drklein.awsiot.middleware;
 
 import java.util.concurrent.BlockingQueue;
 
