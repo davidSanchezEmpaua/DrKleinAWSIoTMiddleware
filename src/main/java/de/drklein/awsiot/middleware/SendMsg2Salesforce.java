@@ -16,6 +16,7 @@
  */
 package de.drklein.awsiot.middleware;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -76,7 +77,9 @@ public class SendMsg2Salesforce implements Runnable {
                         //System.out.println("---------- size: "+messageBuffer.size());
 
                         if (messageBuffer.size() >= bufferingSize) {
-                            System.out.println("---------- Call sendMessages ---------- ");
+                        	if (AWSIoT2Salesforce.VERBOSE)
+                        		System.out.println("----Reached buffer size------ send message to Salesforce");
+                        	
                             sendMessages(this.sforceCnt, messageBuffer);
                         }
                     } catch (JSONException jsonException) {
@@ -86,6 +89,9 @@ public class SendMsg2Salesforce implements Runnable {
                 else {
                     // System.out.println("----Timeout------ size: "+messageBuffer.size()+ " isEmpty: " + messageBuffer.isEmpty());
                     if (!messageBuffer.isEmpty()) {
+                    	if (AWSIoT2Salesforce.VERBOSE)
+                    		System.out.println("----Reached buffering time------ send message to Salesforce");
+                    	
                         sendMessages(this.sforceCnt,messageBuffer);
                     }
                 }
@@ -102,8 +108,12 @@ public class SendMsg2Salesforce implements Runnable {
         jsonPayload.put("keyPushMsg",messages.values());
         messages.clear();
 
-        //System.out.println("----JsonString: "+jsonPayload.toString());
+        if (AWSIoT2Salesforce.VERBOSE)
+        	System.err.println(LocalDateTime.now() + " ----SendMsg2Salesforce.sendMessages: "+jsonPayload.toString());
 
-        sforceCnt.sendData(jsonPayload.toString());
+        if (sforceCnt.sendData(jsonPayload.toString()).equals("INVALID_SESSION_ID")) { // Usually due to session having expired.
+        	sforceCnt.login();													       // Try re-login and resend.
+        	sforceCnt.sendData(jsonPayload.toString());
+        }
     }
 }

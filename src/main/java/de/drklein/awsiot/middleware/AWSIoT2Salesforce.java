@@ -6,7 +6,7 @@
  * 
  *          The events received from Kex Push are buffered and deduplicated before being send to Salesforce.
  *          The Kex Push event payload is the (partner) ID of the record being update. An event is generated
- *          time a field is updated, so multiple updates could be sent when a record is being updated. The
+ *          each time a field is updated, so multiple updates could be sent when a record is being updated. The
  *          deduplication mergers these events into a single message before transmitting to Salesforce.
  * 
  *          Events are also buffered, so that a batch of events are transmitted to Salesforce instead of 
@@ -33,6 +33,8 @@ public final class AWSIoT2Salesforce {
 
     private static final String PropertyFile = "resources/AWSIoT2Salesforce.properties"; // "DrKleinAWSIoTMiddleware/resources/AWSIoT2Salesforce.properties";
     private static int BOUND = 1000;     // Buffering Queue Size
+    
+    public static Boolean VERBOSE = false;
 
     private AWSIoT2Salesforce() {
     }
@@ -46,6 +48,10 @@ public final class AWSIoT2Salesforce {
         System.err.println(LocalDateTime.now() + " ---Initialization---");
         
         AWSutilities.setPropertyFileName(PropertyFile);
+        
+        if (AWSutilities.getConfig("LOG_VERBOSE").equals("1")) {
+        	VERBOSE = true;
+        }
 
         String subscriptionTopic = AWSutilities.getConfig("subscriptionTopic");
         
@@ -60,11 +66,9 @@ public final class AWSIoT2Salesforce {
 
         awsIotCnt.subscribe(subscriptionTopic, queue);
 
-        System.err.println("---------------------------------Before AWSIotConnect---------------------------------------------");
+        System.err.println(LocalDateTime.now() + " ---Connect to Salesforce---");
         
         SalesforceConnect sforceCnt = new SalesforceConnect();
-
-        System.err.println(LocalDateTime.now() + " ---Connect to Salesforce---");
 
         new Thread(new SendMsg2Salesforce(sforceCnt,queue)).start();
     }

@@ -42,17 +42,25 @@ public class SalesforceConnect {
     
     private String accessToken = null;
     private String instanceUrl = null;
+    
+    private final String USERNAME;
+    private final String PASSWORD;
+    private final String SECTOKEN;
+    private final String LOGINURL;
+    private final String GRANTSERVICE;
+    private final String CLIENTID;
+    private final String CLIENTSECRET;
 
     public SalesforceConnect() {
 
-        final String USERNAME = AWSutilities.getConfig("SF_USERNAME");
-        final String PASSWORD = AWSutilities.getConfig("SF_PASSWORD");
-        final String SECTOKEN = AWSutilities.getConfig("SF_SECTOKEN");
-        final String LOGINURL = AWSutilities.getConfig("SF_LOGINURL");
-        final String GRANTSERVICE = AWSutilities.getConfig("SF_GRANTSERVICE");
-        final String CLIENTID = AWSutilities.getConfig("SF_CLIENTID");
-        final String CLIENTSECRET = AWSutilities.getConfig("SF_CLIENTSECRET");
-
+    	 USERNAME = AWSutilities.getConfig("SF_USERNAME");
+    	 PASSWORD = AWSutilities.getConfig("SF_PASSWORD");
+    	 SECTOKEN = AWSutilities.getConfig("SF_SECTOKEN");
+    	 LOGINURL = AWSutilities.getConfig("SF_LOGINURL");
+    	 GRANTSERVICE = AWSutilities.getConfig("SF_GRANTSERVICE");
+    	 CLIENTID = AWSutilities.getConfig("SF_CLIENTID");
+    	 CLIENTSECRET = AWSutilities.getConfig("SF_CLIENTSECRET");
+        
         if ( AWSutilities.isNullOrEmpty(USERNAME)) {
             System.err.println("Salesforce Username is required.");
             throw new SecurityException("Salesforce Username is required.");
@@ -81,8 +89,13 @@ public class SalesforceConnect {
             System.err.println("Salesforce Client Secret is required.");
             throw new SecurityException("Salesforce Client Secret is required.");
         }
+        
+        login();
 
-        final CloseableHttpClient httpclient = HttpClients.createDefault();
+    }
+    
+    public void login() {
+    	final CloseableHttpClient httpclient = HttpClients.createDefault();
         
         // Assemble the login request URL
         String loginURL = LOGINURL +
@@ -136,46 +149,65 @@ public class SalesforceConnect {
         }
 
         //System.out.println(response.getStatusLine());
-        System.out.println(LocalDateTime.now() + " --- Successful Salesforce login");
+        System.err.println(LocalDateTime.now() + " --- Successful Salesforce login");
+        System.err.println(" --instance URL: "+instanceUrl);
         
-        System.out.println(" instance URL: "+instanceUrl);
-        System.out.println(" access token/session ID: "+accessToken);
+        if (AWSIoT2Salesforce.VERBOSE)
+        	System.err.println(" --access token/session ID: "+accessToken);
     }
 
-    public void sendData(String payload) {
+    /*------------*/
+    public String sendData(String payload) {
         String finalURI = instanceUrl + "/services/apexrest/kexPush/";
         Header oAuthHeader = new BasicHeader("Authorization", "OAuth " + accessToken) ;
         Header printHeader = new BasicHeader("X-PrettyPrint", "1");
         
         try {
 
-        System.out.println("---SalesforceConnect.sendData--- payload: " + payload);
-
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
-        HttpPost httpPost = new HttpPost(finalURI);
-        httpPost.addHeader(oAuthHeader);
-        httpPost.addHeader(printHeader);
-        StringEntity entityBody = new StringEntity(payload);
-        entityBody.setContentType("application/json");
-        httpPost.setEntity(entityBody);
-
-        HttpResponse httpResponse = httpClient.execute(httpPost);
-
-        int statusCode = httpResponse.getStatusLine().getStatusCode();
-        if (statusCode == 200) {
-            String responseString = EntityUtils.toString(httpResponse.getEntity());
-            System.err.println("Response: " + responseString);
-        } else {
-            System.err.println(LocalDateTime.now() + " ---ERROR Salesforce Response -- Status code: " + statusCode + " Message: " + EntityUtils.toString(httpResponse.getEntity()));
-        }
+	        //System.err.println("---SalesforceConnect.sendData--- payload: " + payload);
+	
+	        HttpClient httpClient = HttpClientBuilder.create().build();
+	
+	        HttpPost httpPost = new HttpPost(finalURI);
+	        httpPost.addHeader(oAuthHeader);
+	        httpPost.addHeader(printHeader);
+	        StringEntity entityBody = new StringEntity(payload);
+	        entityBody.setContentType("application/json");
+	        httpPost.setEntity(entityBody);
+	
+	        HttpResponse httpResponse = httpClient.execute(httpPost);
+	
+	        int statusCode = httpResponse.getStatusLine().getStatusCode();
+	        
+	        if (statusCode == 200) {
+	            String responseString = EntityUtils.toString(httpResponse.getEntity());
+	            System.err.println("Response: " + responseString);
+	            return "OK";
+	        }
+	        else if (statusCode == 401) { // errorCode" : "INVALID_SESSION_ID
+	        	String errMsg = EntityUtils.toString(httpResponse.getEntity());
+	        	
+	        	if (errMsg.contains("INVALID_SESSION_ID")) {
+	        		return("INVALID_SESSION_ID");
+	        	}
+	        	else {
+	        		return "ERROR";
+	        	}
+	        	
+	        } else {
+	            System.err.println(LocalDateTime.now() + " ---ERROR Salesforce Response -- Status code: " + statusCode + " Message: " + EntityUtils.toString(httpResponse.getEntity()));
+	            return "ERROR";
+	        }
         } catch (JSONException jsonException) {
-            System.err.println(LocalDateTime.now() + " ---ERRORIssue creating JSON or processing results");
+            System.err.println(LocalDateTime.now() + " ---ERROR creating JSON or processing results");
             jsonException.printStackTrace();
+            return "ERROR";
         } catch (IOException ioException) {
             ioException.printStackTrace();
+            return "ERROR";
         } catch (Exception exception) {
             exception.printStackTrace();
+            return "ERROR";
         }
     }
 }
