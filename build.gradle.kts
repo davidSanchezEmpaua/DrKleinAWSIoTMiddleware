@@ -4,6 +4,13 @@ repositories {
 
 plugins {
     java
+    application
+}
+
+version = "1.0-SNAPSHOT"
+
+application {
+    mainClassName = "de.drklein.awsiot.middleware.AWSIoT2Salesforce"
 }
 
 java {
@@ -27,5 +34,15 @@ tasks {
     wrapper {
         gradleVersion = "5.6.2"
         distributionType = Wrapper.DistributionType.ALL
+    }
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = application.mainClassName
+    }
+
+    from(configurations.runtime.get().map {if (it.isDirectory) it else zipTree(it)}) {
+        exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
     }
 }
