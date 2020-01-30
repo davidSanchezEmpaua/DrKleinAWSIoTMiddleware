@@ -72,28 +72,6 @@ public class AWSutilities {
         }
     }
 
-    public static KeyStorePasswordPair getKeyStorePasswordPair(final String certificateFile, final String privateKeyFile) {
-        return getKeyStorePasswordPair(certificateFile, privateKeyFile, null);
-    }
-
-    public static KeyStorePasswordPair getKeyStorePasswordPair(final String certificateFile, final String privateKeyFile,
-            String keyAlgorithm) {
-        if (certificateFile == null || privateKeyFile == null) {
-            System.err.println(LocalDateTime.now() + " ---ERROR: Certificate or private key file missing");
-            return null;
-        }
-        
-        //System.err.println("Cert file:" +certificateFile + " Private key: "+ privateKeyFile);
-
-        final PrivateKey privateKey = loadPrivateKeyFromFile(privateKeyFile, keyAlgorithm);
-
-        final List<Certificate> certChain = loadCertificatesFromFile(certificateFile);
-
-        if (certChain == null || privateKey == null) return null;
-
-        return getKeyStorePasswordPair(certChain, privateKey);
-    }
-
     public static KeyStorePasswordPair getKeyStorePasswordPair(final List<Certificate> certificates, final PrivateKey privateKey) {
         KeyStore keyStore;
         String keyPassword;
@@ -116,7 +94,7 @@ public class AWSutilities {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Certificate> loadCertificatesFromFile(final String filename) {
+    public static List<Certificate> loadCertificatesFromFile(final String filename) {
         File file = new File(filename);
         if (!file.exists()) {
             System.err.println(LocalDateTime.now() + " ---ERROR: Certificate file: " + filename + " is not found.");
@@ -133,7 +111,7 @@ public class AWSutilities {
         return null;
     }
 
-    private static PrivateKey loadPrivateKeyFromFile(final String filename, final String algorithm) {
+    public static PrivateKey loadPrivateKeyFromFile(final String filename, final String algorithm) {
         PrivateKey privateKey = null;
 
         File file = new File(filename);

@@ -25,7 +25,10 @@
 
 package de.drklein.awsiot.middleware;
 
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -84,9 +87,9 @@ public final class AWSIoT2Salesforce {
         AwsConfig awsConfig = new AwsConfig();
         awsConfig.setClientEndpoint(AWSutilities.getConfig("clientEndpoint"));
         awsConfig.setClientId(AWSutilities.getConfig("clientId"));
-        awsConfig.setCertificateFile(AWSutilities.getConfig("certificateFile")); // resources/certificate.txt
-        awsConfig.setPrivateKeyFile(AWSutilities.getConfig("privateKeyFile")); // same here
         awsConfig.setSubscriptionTopic(AWSutilities.getConfig("subscriptionTopic"));
+        setCertificate(awsConfig);
+        setPrivateKey(awsConfig);
 
         awsConfig.setLOG_VERBOSE(AWSutilities.getConfig("LOG_VERBOSE"));
 
@@ -98,6 +101,24 @@ public final class AWSIoT2Salesforce {
         awsConfig.setSF_CLIENTID(AWSutilities.getConfig("SF_CLIENTID"));
         awsConfig.setSF_CLIENTSECRET(AWSutilities.getConfig("SF_CLIENTSECRET"));
         return awsConfig;
+    }
+
+    private static void setPrivateKey(AwsConfig awsConfig) {
+        String privateKeyFile = AWSutilities.getConfig("privateKeyFile");
+        if (privateKeyFile == null) {
+            System.err.println(LocalDateTime.now() + " ---ERROR: private key file missing");
+        }
+        final PrivateKey privateKey = AWSutilities.loadPrivateKeyFromFile(privateKeyFile, "RSA");
+        awsConfig.setPrivateKey(privateKey);
+    }
+
+    private static void setCertificate(AwsConfig awsConfig) {
+        String certificateFile = AWSutilities.getConfig("certificateFile");
+        if (certificateFile == null) {
+            System.err.println(LocalDateTime.now() + " ---ERROR: certificate file missing");
+        }
+        final List<Certificate> certChain = AWSutilities.loadCertificatesFromFile(certificateFile);
+        awsConfig.setCertificates(certChain);
     }
 }
 

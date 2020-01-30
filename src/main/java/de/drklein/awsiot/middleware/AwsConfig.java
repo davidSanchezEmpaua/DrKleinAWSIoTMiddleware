@@ -1,10 +1,12 @@
 package de.drklein.awsiot.middleware;
 
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.util.List;
+
 public class AwsConfig {
   private String clientEndpoint;
   private String clientId;
-  private String certificateFile;
-  private String privateKeyFile;
   private String thingName;
   private String subscriptionTopic;
   private String SF_USERNAME;
@@ -17,8 +19,8 @@ public class AwsConfig {
   private String BUFFERING_SIZE;
   private String BUFFERING_TIMELIMIT;
   private String LOG_VERBOSE;
-  private String certificate;
-  private String privateKey;
+  private List<Certificate> certificates;
+  private PrivateKey privateKey;
 
   public String getClientEndpoint() {
     return clientEndpoint;
@@ -34,22 +36,6 @@ public class AwsConfig {
 
   public void setClientId(String clientId) {
     this.clientId = clientId;
-  }
-
-  public String getCertificateFile() {
-    return certificateFile;
-  }
-
-  public void setCertificateFile(String certificateFile) {
-    this.certificateFile = certificateFile;
-  }
-
-  public String getPrivateKeyFile() {
-    return privateKeyFile;
-  }
-
-  public void setPrivateKeyFile(String privateKeyFile) {
-    this.privateKeyFile = privateKeyFile;
   }
 
   public String getThingName() {
@@ -148,19 +134,19 @@ public class AwsConfig {
     this.LOG_VERBOSE = LOG_VERBOSE;
   }
 
-  public String getCertificate() {
-    return certificate;
+  public List<Certificate> getCertificates() {
+    return certificates;
   }
 
-  public void setCertificate(String certificate) {
-    this.certificate = certificate;
+  public void setCertificates(List<Certificate> certificates) {
+    this.certificates = certificates;
   }
 
-  public String getPrivateKey() {
+  public PrivateKey getPrivateKey() {
     return privateKey;
   }
 
-  public void setPrivateKey(String privateKey) {
+  public void setPrivateKey(PrivateKey privateKey) {
     this.privateKey = privateKey;
   }
 }

@@ -28,22 +28,13 @@ public class AWSIotConnect {
 
     public static AWSIotMqttClient awsIotClient;
 
-    public static void setClient(AWSIotMqttClient client) {
-        awsIotClient = client;
-    }
-
     public AWSIotConnect(AwsConfig awsConfig) {
         try {
             System.err.println(LocalDateTime.now() + " ---clientEndpoint: " + awsConfig.getClientEndpoint());
             System.err.println(LocalDateTime.now() + " ---clientId: " + awsConfig.getClientId());
-            System.err.println(LocalDateTime.now() + " ---certificateFile: " + awsConfig.getCertificateFile());
-            System.err.println(LocalDateTime.now() + " ---privateKeyFile: " + awsConfig.getPrivateKeyFile());
 
-            if (awsIotClient == null && awsConfig.getCertificateFile() != null && awsConfig.getPrivateKeyFile() != null) {
-                String algorithm = null;
-                System.err.println("---algorithm: " + algorithm);
-
-                KeyStorePasswordPair pair = AWSutilities.getKeyStorePasswordPair(awsConfig.getCertificateFile(), awsConfig.getPrivateKeyFile(), algorithm);
+            if (awsIotClient == null && awsConfig.getCertificates() != null && awsConfig.getPrivateKey() != null) {
+                KeyStorePasswordPair pair = AWSutilities.getKeyStorePasswordPair(awsConfig.getCertificates(), awsConfig.getPrivateKey());
                 awsIotClient = new AWSIotMqttClient(awsConfig.getClientEndpoint(), awsConfig.getClientId(), pair.keyStore, pair.keyPassword);
 
                 try {
