@@ -48,8 +48,14 @@ public final class AWSIoT2Salesforce {
         System.err.println(LocalDateTime.now() + " ---Initialization---");
         
         AWSutilities.setPropertyFileName(PropertyFile);
-        
-        if (AWSutilities.getConfig("LOG_VERBOSE").equals("1")) {
+        AwsConfig awsConfig = getLocalConfig();
+
+        if(System.getenv("stage") == "production") {
+            AWSSecretsService secretsService = new AWSSecretsService();
+            awsConfig = secretsService.getAwsConfig();
+        }
+
+        if (awsConfig.getLOG_VERBOSE().equals("1")) {
         	VERBOSE = true;
         }
 
@@ -60,7 +66,7 @@ public final class AWSIoT2Salesforce {
 
         System.err.println(LocalDateTime.now() + " ---Connect to AWS IoT---");
         
-        AWSIotConnect awsIotCnt = new AWSIotConnect();
+        AWSIotConnect awsIotCnt = new AWSIotConnect(awsConfig);
 
         System.err.println(LocalDateTime.now() + " ---Subscribe to AWS IoT's Topic---");
 
@@ -68,9 +74,30 @@ public final class AWSIoT2Salesforce {
 
         System.err.println(LocalDateTime.now() + " ---Connect to Salesforce---");
         
-        SalesforceConnect sforceCnt = new SalesforceConnect();
+        SalesforceConnect sforceCnt = new SalesforceConnect(awsConfig);
 
         new Thread(new SendMsg2Salesforce(sforceCnt,queue)).start();
+    }
+
+    // Local Configuration - loading AWS Config via .properties
+    private static AwsConfig getLocalConfig() {
+        AwsConfig awsConfig = new AwsConfig();
+        awsConfig.setClientEndpoint(AWSutilities.getConfig("clientEndpoint"));
+        awsConfig.setClientId(AWSutilities.getConfig("clientId"));
+        awsConfig.setCertificateFile(AWSutilities.getConfig("certificateFile")); // resources/certificate.txt
+        awsConfig.setPrivateKeyFile(AWSutilities.getConfig("privateKeyFile")); // same here
+        awsConfig.setSubscriptionTopic(AWSutilities.getConfig("subscriptionTopic"));
+
+        awsConfig.setLOG_VERBOSE(AWSutilities.getConfig("LOG_VERBOSE"));
+
+        awsConfig.setSF_USERNAME(AWSutilities.getConfig("SF_USERNAME"));
+        awsConfig.setSF_PASSWORD(AWSutilities.getConfig("SF_PASSWORD"));
+        awsConfig.setSF_SECTOKEN(AWSutilities.getConfig("SF_SECTOKEN"));
+        awsConfig.setSF_LOGINURL(AWSutilities.getConfig("SF_LOGINURL"));
+        awsConfig.setSF_GRANTSERVICE(AWSutilities.getConfig("SF_GRANTSERVICE"));
+        awsConfig.setSF_CLIENTID(AWSutilities.getConfig("SF_CLIENTID"));
+        awsConfig.setSF_CLIENTSECRET(AWSutilities.getConfig("SF_CLIENTSECRET"));
+        return awsConfig;
     }
 }
 

@@ -32,38 +32,28 @@ public class AWSIotConnect {
         awsIotClient = client;
     }
 
-    public AWSIotConnect() {
-        String clientEndpoint = AWSutilities.getConfig("clientEndpoint");
-        String clientId = AWSutilities.getConfig("clientId");
-        String certificateFile = AWSutilities.getConfig("certificateFile");
-        String privateKeyFile = AWSutilities.getConfig("privateKeyFile");
+    public AWSIotConnect(AwsConfig awsConfig) {
+        try {
+            System.err.println(LocalDateTime.now() + " ---clientEndpoint: " + awsConfig.getClientEndpoint());
+            System.err.println(LocalDateTime.now() + " ---clientId: " + awsConfig.getClientId());
+            System.err.println(LocalDateTime.now() + " ---certificateFile: " + awsConfig.getCertificateFile());
+            System.err.println(LocalDateTime.now() + " ---privateKeyFile: " + awsConfig.getPrivateKeyFile());
 
-        System.err.println(LocalDateTime.now() + " ---clientEndpoint: " + clientEndpoint);
-        System.err.println(LocalDateTime.now() + " ---clientId: " + clientId);
-        System.err.println(LocalDateTime.now() + " ---certificateFile: " + certificateFile);
-        System.err.println(LocalDateTime.now() + " ---privateKeyFile: " + privateKeyFile);
+            if (awsIotClient == null && awsConfig.getCertificateFile() != null && awsConfig.getPrivateKeyFile() != null) {
+                String algorithm = null;
+                System.err.println("---algorithm: " + algorithm);
 
-        if (awsIotClient == null && certificateFile != null && privateKeyFile != null) {
-            String algorithm = null;
-            System.err.println("---algorithm: " + algorithm);
+                KeyStorePasswordPair pair = AWSutilities.getKeyStorePasswordPair(awsConfig.getCertificateFile(), awsConfig.getPrivateKeyFile(), algorithm);
+                awsIotClient = new AWSIotMqttClient(awsConfig.getClientEndpoint(), awsConfig.getClientId(), pair.keyStore, pair.keyPassword);
 
-            KeyStorePasswordPair pair = AWSutilities.getKeyStorePasswordPair(certificateFile, privateKeyFile, algorithm);
-            //System.err.println("---pair: " + pair);
-
-            awsIotClient = new AWSIotMqttClient(clientEndpoint, clientId, pair.keyStore, pair.keyPassword);
-            //System.err.println("-1--awsIotClient: " + awsIotClient);
-        }      
-
-        if (awsIotClient == null) {
-            throw new IllegalArgumentException("Failed to construct client due to missing certificate or credentials.");
-        }
-        else {
-            try {
-                awsIotClient.connect();
-            } catch (AWSIotException e) {
-                // -TO-DO- Auto-generated catch block
-                e.printStackTrace();
+                try {
+                    awsIotClient.connect();
+                } catch (AWSIotException e) {
+                    throw new IllegalArgumentException("Failed to construct client due to missing certificate or credentials.");
+                }
             }
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
