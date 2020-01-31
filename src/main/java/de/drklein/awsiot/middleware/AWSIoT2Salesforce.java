@@ -49,13 +49,15 @@ public final class AWSIoT2Salesforce {
         System.err.println("---Working Directory: "+System.getProperty("user.dir"));
         System.err.println("=====================================================================================================");
         System.err.println(LocalDateTime.now() + " ---Initialization---");
-        
-        AWSutilities.setPropertyFileName(PropertyFile);
-        AwsConfig awsConfig = getLocalConfig();
+
+        AwsConfig awsConfig;
 
         if(System.getenv("stage").equals("production")) {
             AWSSecretsService secretsService = new AWSSecretsService();
             awsConfig = secretsService.getAwsConfig();
+        } else {
+            AWSutilities.setPropertyFileName(PropertyFile);
+            awsConfig = getLocalConfig();
         }
 
         if (awsConfig.getLOG_VERBOSE().equals("1")) {
