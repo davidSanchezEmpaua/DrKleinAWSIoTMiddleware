@@ -13,9 +13,6 @@
  */
 package de.drklein.awsiot.middleware;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -31,6 +28,9 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class SalesforceConnect {
 
@@ -124,31 +124,26 @@ public class SalesforceConnect {
       //return null;
     }
 
-    String getResult = null;
+    String getResult;
+    JSONObject jsonObject;
 
     try {
       getResult = EntityUtils.toString(response.getEntity());
+      jsonObject = (JSONObject) new JSONTokener(getResult).nextValue();
+      accessToken = jsonObject.getString("access_token");
+      instanceUrl = jsonObject.getString("instance_url");
+
+      //System.out.println(response.getStatusLine());
+      System.err.println(LocalDateTime.now() + " --- Successful Salesforce login");
+      System.err.println(" --instance URL: " + instanceUrl);
+      if (AWSIoT2Salesforce.VERBOSE) { System.err.println(" --access token/session ID: " + accessToken); }
     }
     catch (IOException ioException) {
       // Handle system IO exception
     }
-
-    JSONObject jsonObject = null;
-
-    try {
-      jsonObject = (JSONObject) new JSONTokener(getResult).nextValue();
-      accessToken = jsonObject.getString("access_token");
-      instanceUrl = jsonObject.getString("instance_url");
-    }
     catch (JSONException jsonException) {
       // Handle JSON exception
     }
-
-    //System.out.println(response.getStatusLine());
-    System.err.println(LocalDateTime.now() + " --- Successful Salesforce login");
-    System.err.println(" --instance URL: " + instanceUrl);
-
-    if (AWSIoT2Salesforce.VERBOSE) { System.err.println(" --access token/session ID: " + accessToken); }
   }
 
   /*------------*/
@@ -199,12 +194,8 @@ public class SalesforceConnect {
       jsonException.printStackTrace();
       return "ERROR";
     }
-    catch (IOException ioException) {
+    catch (Exception ioException) {
       ioException.printStackTrace();
-      return "ERROR";
-    }
-    catch (Exception exception) {
-      exception.printStackTrace();
       return "ERROR";
     }
   }

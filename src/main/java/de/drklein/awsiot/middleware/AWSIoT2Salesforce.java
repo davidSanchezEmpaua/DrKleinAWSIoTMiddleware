@@ -34,7 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public final class AWSIoT2Salesforce {
 
-    private static final String PropertyFile = "resources/AWSIoT2Salesforce.properties"; // "DrKleinAWSIoTMiddleware/resources/AWSIoT2Salesforce.properties";
+    private static final String PropertyFile = "resources/AWSIoT2Salesforce.properties";
     private static int BOUND = 1000;     // Buffering Queue Size
     
     public static Boolean VERBOSE = false;
@@ -53,7 +53,7 @@ public final class AWSIoT2Salesforce {
         AWSutilities.setPropertyFileName(PropertyFile);
         AwsConfig awsConfig = getLocalConfig();
 
-        if(System.getenv("stage") == "production") {
+        if(System.getenv("stage").equals("production")) {
             AWSSecretsService secretsService = new AWSSecretsService();
             awsConfig = secretsService.getAwsConfig();
         }
@@ -62,8 +62,6 @@ public final class AWSIoT2Salesforce {
         	VERBOSE = true;
         }
 
-        String subscriptionTopic = AWSutilities.getConfig("subscriptionTopic");
-        
         // Queue to store messages/events received before they are buffered for sending to Salesforce.
         BlockingQueue<String> queue = new LinkedBlockingQueue<>(BOUND);
 
@@ -73,13 +71,13 @@ public final class AWSIoT2Salesforce {
 
         System.err.println(LocalDateTime.now() + " ---Subscribe to AWS IoT's Topic---");
 
-        awsIotCnt.subscribe(subscriptionTopic, queue);
+        awsIotCnt.subscribe(awsConfig.getSubscriptionTopic(), queue);
 
         System.err.println(LocalDateTime.now() + " ---Connect to Salesforce---");
         
         SalesforceConnect sforceCnt = new SalesforceConnect(awsConfig);
 
-        new Thread(new SendMsg2Salesforce(sforceCnt,queue)).start();
+        new Thread(new SendMsg2Salesforce(awsConfig, sforceCnt,queue)).start();
     }
 
     // Local Configuration - loading AWS Config via .properties
@@ -92,6 +90,8 @@ public final class AWSIoT2Salesforce {
         setPrivateKey(awsConfig);
 
         awsConfig.setLOG_VERBOSE(AWSutilities.getConfig("LOG_VERBOSE"));
+        awsConfig.setBUFFERING_SIZE(AWSutilities.getConfig("BUFFERING_SIZE"));
+        awsConfig.setBUFFERING_TIMELIMIT(AWSutilities.getConfig("BUFFERING_TIMELIMIT"));
 
         awsConfig.setSF_USERNAME(AWSutilities.getConfig("SF_USERNAME"));
         awsConfig.setSF_PASSWORD(AWSutilities.getConfig("SF_PASSWORD"));

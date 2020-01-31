@@ -21,6 +21,8 @@
 
 package de.drklein.awsiot.middleware;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -34,8 +36,6 @@ import java.security.PrivateKey;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * Class for reading RSA or ECC private key from PEM file.
@@ -170,7 +170,7 @@ public class PrivateKeyReader {
      * @throws IOException
      *             IOException resulted from invalid file IO
      */
-    private static RSAPrivateCrtKeySpec getRSAKeySpec(byte[] keyBytes) throws IOException {
+    public static RSAPrivateCrtKeySpec getRSAKeySpec(byte[] keyBytes) throws IOException {
 
         DerParser parser = new DerParser(keyBytes);
 

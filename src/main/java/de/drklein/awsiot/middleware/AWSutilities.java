@@ -16,10 +16,12 @@
 package de.drklein.awsiot.middleware;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -31,6 +33,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -94,6 +97,22 @@ public class AWSutilities {
     }
 
     @SuppressWarnings("unchecked")
+    public static List<Certificate> createCertificates(String certificate) {
+        try {
+            InputStream initialStream = new ByteArrayInputStream(certificate.getBytes());
+            BufferedInputStream stream = new BufferedInputStream(initialStream);
+            Certificate t =  CertificateFactory.getInstance("X.509").generateCertificate(new BufferedInputStream(new ByteArrayInputStream(certificate.getBytes())));
+            List<Certificate> certificates = new ArrayList<>();
+            certificates.add(t);
+            return certificates;
+
+        } catch (CertificateException e) {
+            System.err.println(LocalDateTime.now() + " ---ERROR: Failed to create certificate with " + certificate);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     public static List<Certificate> loadCertificatesFromFile(final String filename) {
         File file = new File(filename);
         if (!file.exists()) {
@@ -111,7 +130,7 @@ public class AWSutilities {
         return null;
     }
 
-    public static PrivateKey loadPrivateKeyFromFile(final String filename, final String algorithm) {
+    static PrivateKey loadPrivateKeyFromFile(final String filename, final String algorithm) {
         PrivateKey privateKey = null;
 
         File file = new File(filename);
@@ -128,10 +147,8 @@ public class AWSutilities {
         return privateKey;
     }
 
-    public static boolean isNullOrEmpty(String str) {
-        if(str != null && !str.isEmpty())
-            return false;
-        return true;
+    static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
     }
 
 }

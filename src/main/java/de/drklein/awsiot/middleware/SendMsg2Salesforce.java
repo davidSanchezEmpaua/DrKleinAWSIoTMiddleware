@@ -16,6 +16,10 @@
  */
 package de.drklein.awsiot.middleware;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +27,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 // import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class SendMsg2Salesforce implements Runnable {
     private SalesforceConnect sforceCnt;
@@ -40,12 +41,12 @@ public class SendMsg2Salesforce implements Runnable {
         @parameter: sforceCnt -- connection to Salesforce to where messages should be send
                     queue     -- Queue from where the messages to be sent are retrived.
      */
-    public SendMsg2Salesforce(SalesforceConnect sforceCnt, BlockingQueue<String> queue) {
+    public SendMsg2Salesforce(AwsConfig config, SalesforceConnect sforceCnt, BlockingQueue<String> queue) {
         this.queue = queue;
         this.sforceCnt = sforceCnt;
 
-        String buffSizeProperty = AWSutilities.getConfig("BUFFERING_SIZE");
-        String buffTimeLmtProperty = AWSutilities.getConfig("BUFFERING_TIMELIMIT");
+        String buffSizeProperty = config.getBUFFERING_SIZE();
+        String buffTimeLmtProperty = config.getBUFFERING_TIMELIMIT();
 
         if (buffSizeProperty != null)
             bufferingSize = Integer.parseInt(buffSizeProperty);
