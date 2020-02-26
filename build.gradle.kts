@@ -19,6 +19,7 @@ java {
 }
 
 dependencies {
+    compile("com.amazonaws:aws-java-sdk-secretsmanager:1.11.316")
     compile("com.amazonaws:aws-iot-device-sdk-java:1.3.4")
     compile("commons-codec:commons-codec:1.13")
     compile("commons-logging:commons-logging:1.2")

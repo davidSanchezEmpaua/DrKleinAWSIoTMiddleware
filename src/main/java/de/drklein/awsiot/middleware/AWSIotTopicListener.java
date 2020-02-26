@@ -15,11 +15,11 @@
 
 package de.drklein.awsiot.middleware;
 
-import java.util.concurrent.BlockingQueue;
-
 import com.amazonaws.services.iot.client.AWSIotMessage;
 import com.amazonaws.services.iot.client.AWSIotQos;
 import com.amazonaws.services.iot.client.AWSIotTopic;
+
+import java.util.concurrent.BlockingQueue;
 
 /**
  * This class extends {@link AWSIotTopic} to receive messages from a subscribed
@@ -40,7 +40,6 @@ public class AWSIotTopicListener extends AWSIotTopic {
         try {
             msgQueue.put(message.getStringPayload());
         } catch (InterruptedException e) {
-            // T O D O Auto-generated catch block
             e.printStackTrace();
         }
     }
