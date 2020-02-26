@@ -30,8 +30,8 @@ import static de.drklein.awsiot.middleware.PrivateKeyReader.getRSAKeySpec;
 
 public class AWSSecretsService {
   public AwsConfig getAwsConfig() {
-    String secretName = "drklein/test/kex-push-service/credentials";
-    String region = "us-east-2";
+    String secretName = "drklein/kex-push-service/credentials";
+    String region = "eu-central-1";
     String secret;
 
     AWSSecretsManager client = AWSSecretsManagerClientBuilder.standard()
@@ -53,13 +53,20 @@ public class AWSSecretsService {
       if (getSecretValueResult.getSecretString() != null) {
         secret = getSecretValueResult.getSecretString();
 
-        HashMap<String, String> secretMap;
+        HashMap<String, Map> secretMap;
         ObjectMapper objectMapper = new ObjectMapper();
-        secretMap = objectMapper.readValue(secret, new TypeReference<HashMap<String, String>>() {
-        });
+        secretMap = objectMapper.readValue(secret, new TypeReference<HashMap<String, Map>>() {});
         System.out.println("Secrets are: " + secretMap);
 
-        return getProductionConfig(secretMap);
+        if(System.getenv("stage").equals("development") && secretMap.get("testumgebung") != null) {
+          return getTestumgebungConfig(secretMap.get("testumgebung"));
+        }
+
+        if(System.getenv("stage").equals("production") && secretMap.get("echtgeschaeft") != null) {
+          return getProductionConfig(secretMap.get("echtgeschaeft"));
+        }
+
+        return null;
       }
     }
     catch (DecryptionFailureException e) {
@@ -94,7 +101,15 @@ public class AWSSecretsService {
   }
 
   // Local Configuration - loading AWS Config via .properties
-  private static AwsConfig getProductionConfig(Map<String, String> secretMap) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
+  private static AwsConfig getProductionConfig(Map<String, String> secretMap) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+    return getConfig(secretMap);
+  }
+
+  private static AwsConfig getTestumgebungConfig(Map<String, String> secretMap) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+    return getConfig(secretMap);
+  }
+
+  private static AwsConfig getConfig(Map<String, String> secretMap) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
     AwsConfig awsConfig = new AwsConfig();
     awsConfig.setClientEndpoint(secretMap.get("clientEndpoint"));
     awsConfig.setClientId(secretMap.get("clientId"));
@@ -137,3 +152,7 @@ public class AWSSecretsService {
     return AWSutilities.createCertificates(certificate);
   }
 }
+
+
+
+
