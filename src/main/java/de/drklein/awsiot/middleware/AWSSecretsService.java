@@ -30,7 +30,7 @@ import static de.drklein.awsiot.middleware.PrivateKeyReader.getRSAKeySpec;
 
 public class AWSSecretsService {
   public AwsConfig getAwsConfig() {
-    String secretName = "drklein/kex-push-service/credentials";
+    String secretName = System.getenv("secretName");
     String region = "eu-central-1";
     String secret;
 
